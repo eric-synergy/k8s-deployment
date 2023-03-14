@@ -1,0 +1,37 @@
+#cloud-config
+autoinstall:
+    version: 1
+    updates: security
+    apt:
+        disable_suites: [security]    
+    early-commands:
+        # workaround to stop ssh for packer as it thinks it timed out
+        - sudo systemctl stop ssh
+    locale: en_US
+    keyboard:
+        layout: en
+        variant: us
+    packages: [open-vm-tools, openssh-server, net-tools, perl, perl-modules, open-iscsi, ntp, curl, vim, ifupdown, zip, unzip, gnupg2, software-properties-common, apt-transport-https, ca-certificates, lsb-release, python3-pip, jq]
+    network:
+        network:
+            version: 2
+            ethernets:
+                ens192:
+                    dhcp4: true
+    identity:
+        hostname: ubuntu-server
+        username: veeamadmin
+        password: "$6$acoJqJPCUk9esMzQ$8Cpgm9tNjOtA/KmcXOH.t0YDvgaQS/RoH9oBngFDZ.TRAiuL473fv6Sq/YzDizNY86tWH7B5yu332N5jtTRmh0"
+    ssh:
+        install-server: yes
+        allow-pw: yes
+        authorized-keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxznyNlmk8Yu8ogprMeM9s0zRe5CDyFjMJ/DwlsvKlQneoAMgW+ejXJLAMXcLRqAb+Kvg63dEz7uNGwJnq+XrOeE7+OZ1p8mDNdW24tstCkv02w8e59iHOYJUhI3e+0DLKyIVmJBe0SuavpAUj16E4ZENd4fgH76XQ3mpKykVVf2GA6+CeBWABbKxNijGE50Ms7qGFQWeaEZE+KoqE/LTuJeuNPANtfD8t8Gf9+yOwBh5Gzi6+6MfPdO0WGpG1/Tahx+8viBjiUdXoangpIysE95cQnb25qzzDm0g/FkHAk5HOpQpvp2S3bZbF/h/d3BelmfclkUqbQ/kqv6FbQlDf root@central.entlab.local
+    storage:
+        layout:
+            name: direct
+    user-data:
+        disable_root: false
+    late-commands:
+        - echo 'veeamadmin ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/veeamadmin
+        - curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/veeamadmin
